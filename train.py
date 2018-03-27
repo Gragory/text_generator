@@ -13,40 +13,39 @@ model = arg.model
 low = arg.lc
 
 if arg.direct != "":
-    f = open(arg.direct, "r")
-    text = f.read()
-    f.close()
+    with open(arg.direct, "r") as f:
+        text = f.read()
 else:
-    r_ad = input()
-    while ord(r_ad) != 26:
-        text += r_ad
+    re_ad = input()
+    while ord(re_ad) != 26:
+        text += re_ad
+        re_ad = input()
 if low:
     text = text.lower()
-l_st = re.findall(r"[\w']+", text)
-d = {}
-d_2 = {}
-for i in range(len(l_st)-2):
-    if not l_st[i + 1] in d_2.keys():
-        d_2.update({l_st[i + 1]: {l_st[i + 2]: 1}})
+list_of_words = re.findall(r"[\w']+", text)
+probability_dict = {}
+count_dict = {}
+for i in range(len(list_of_words)-2):
+    if not list_of_words[i + 1] in count_dict.keys():
+        count_dict.update({list_of_words[i + 1]: {list_of_words[i + 2]: 1}})
     else:
         r = False
-        if l_st[i + 2] in d_2[l_st[i + 1]].keys():
-            d_2[l_st[i + 1]][l_st[i + 2]] += 1
+        if list_of_words[i + 2] in count_dict[list_of_words[i + 1]].keys():
+            count_dict[list_of_words[i + 1]][list_of_words[i + 2]] += 1
         else:
-            d_2[l_st[i + 1]].update({l_st[i + 2]: 1})
-for i in d_2.keys():
-    su_m = 0
-    second = list(d_2[i].keys())
+            count_dict[list_of_words[i + 1]].update({list_of_words[i + 2]: 1})
+for i in count_dict.keys():
+    sum_of_counts = 0
+    second = list(count_dict[i].keys())
     for i2 in range(len(second) - 1):
-        d_2[i][second[i2 + 1]] += d_2[i][second[i2]]
+        count_dict[i][second[i2 + 1]] += count_dict[i][second[i2]]
         if i2 == len(second) - 2:
-            su_m = d_2[i][second[i2 + 1]]
-    if su_m == 0:
-        su_m = d_2[i][second[-1]]
-    d_1 = {}
-    for i2 in d_2[i].keys():
-        d_1.update({d_2[i][i2]/su_m: i2})
-    d.update({i: d_1})
-f = open(model, 'wb')
-pickle.dump(d, f)
-f.close()
+            sum_of_counts = count_dict[i][second[i2 + 1]]
+    if sum_of_counts == 0:
+        sum_of_counts = count_dict[i][second[-1]]
+    additional_dict = {}
+    for i2 in count_dict[i].keys():
+        additional_dict.update({count_dict[i][i2]/sum_of_counts: i2})
+    probability_dict.update({i: additional_dict})
+with open(model, 'wb') as f:
+    pickle.dump(probability_dict, f)
