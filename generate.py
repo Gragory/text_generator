@@ -11,37 +11,35 @@ parser.add_argument('--output', dest='out', type=str, default="", help='адре
 arg = parser.parse_args()
 model = arg.model
 seed = arg.seed
-lth = arg.length
-out = arg.out
+length_of_text = arg.length
+output_directory = arg.out
 
-f = open(model, "rb")
-d = pickle.load(f)
-f.close()
+with open(model, "rb") as f:
+    probability_dict = pickle.load(f)
 
 if seed != "":
-    first = seed
+    first_word = seed
 else:
-    first = random.choice(list(d.keys()))
+    first_word = random.choice(list(probability_dict.keys()))
 
-gen = first
-for i in range(lth):
-    if not (first in d.keys()):
-        first = random.choice(list(d.keys()))
+generated_text = first_word
+for i in range(length_of_text-1):
+    if not (first_word in probability_dict.keys()):
+        first_word = random.choice(list(probability_dict.keys()))
     else:
         x = random.random()
-        l_first = list(d[first].keys())
-        z_f = True
-        for i2 in range(len(l_first) - 1):
-            if (l_first[i2 + 1] >= x) and (l_first[i2] < x):
-                first = d[first][l_first[i2]]
-                z_f = False
+        list_of_going_after_first = list(probability_dict[first_word].keys())
+        the_element_i_need_is_numbered_zero_flag = True
+        for i2 in range(len(list_of_going_after_first) - 1):
+            if (list_of_going_after_first[i2 + 1] >= x) and (list_of_going_after_first[i2] < x):
+                first_word = probability_dict[first_word][list_of_going_after_first[i2]]
+                the_element_i_need_is_numbered_zero_flag = False
                 break
-        if z_f:
-            first = d[first][l_first[0]]
-    gen = "{} {}".format(gen, first)
-if out != "":
-    f = open(out, "w")
-    f.write(gen)
-    f.close()
+        if the_element_i_need_is_numbered_zero_flag:
+            first_word = probability_dict[first_word][list_of_going_after_first[0]]
+    generated_text = "{} {}".format(generated_text, first_word)
+if output_directory != "":
+    with open(output_directory, "w") as f:
+        f.write(generated_text)
 else:
-    print(gen)
+    print(generated_text)
