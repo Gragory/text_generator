@@ -17,11 +17,10 @@ def give_first(seed, model):
 
 
 def find_prob(list_of_going_after_first):
-    x = random.random()
-    for i2 in range(len(list_of_going_after_first) - 1):
-        if (list_of_going_after_first[i2 + 1] >= x) and (list_of_going_after_first[i2] < x):
-            return i2
-    return 0
+    addition = []
+    for i in list_of_going_after_first.keys():
+        addition.extend([i] * list_of_going_after_first[i])
+    return random.choice(addition)
 
 
 def step_of_gen(model, first_word):
@@ -29,16 +28,15 @@ def step_of_gen(model, first_word):
     if not (first_word in probability_dict.keys()):
         return random.choice(list(probability_dict.keys()))
     else:
-        list_of_going_after_first = list(probability_dict[first_word].keys())
-        return probability_dict[first_word][list_of_going_after_first[find_prob(list_of_going_after_first)]]
+        return find_prob(probability_dict[first_word])
 
 
 def gen_text(model, length_of_text, first_word):
-    generated_text = first_word
+    generated_text = [first_word]
     for i in range(length_of_text - 1):
         first_word = step_of_gen(model, first_word)
-        generated_text = "{} {}".format(generated_text, first_word)
-    return generated_text
+        generated_text.append(first_word)
+    return ' '.join(generated_text)
 
 
 def text_output(output_directory, generated_text):
